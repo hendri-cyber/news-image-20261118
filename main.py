@@ -1,27 +1,31 @@
-"""World news image entry for 18 November 2026.
+"""Deliver the 18 November 2026 world-news image to the grader.
 
-The entry image is the entry.png beside this file. This program
-copies it, byte for byte, to the grader's output directory.
-Standard library only, no network, deterministic: both runs
-write identical bytes.
+The picture lives beside this script. The script copies it,
+byte for byte, into the grader's output folder. It needs no
+network, no clock and no randomness, so running it twice
+produces the same file twice.
 """
+
 import os
 import shutil
 from pathlib import Path
 
-# Output directory: the grader sets /output, locally use
-# MAKEFUN_OUTPUT_DIR to test, e.g. MAKEFUN_OUTPUT_DIR=out
-OUTPUT_DIR = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
-
-# Source image lives next to this program in the repository.
-# The grader runs this file twice; a plain copy guarantees
-# both runs produce the same bytes.
-SOURCE = Path(__file__).resolve().parent / "entry.png"
+BASE = Path(__file__).resolve().parent
+PICTURE = BASE / "entry.png"
+OUTDIR = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
+TARGET = OUTDIR / "entry.png"
 
 
 def main() -> None:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(SOURCE, OUTPUT_DIR / "entry.png")
+    """Copy the picture into the grader's output folder."""
+    OUTDIR.mkdir(parents=True, exist_ok=True)
+    if not PICTURE.is_file():
+        raise SystemExit(f"entry image missing: {PICTURE}")
+    shutil.copyfile(PICTURE, TARGET)
+    got = TARGET.stat().st_size
+    want = PICTURE.stat().st_size
+    if got != want:
+        raise SystemExit(f"incomplete copy, got {got} bytes, expected {want}")
 
 
 if __name__ == "__main__":
